@@ -1,0 +1,69 @@
+public class ExpressionTree {
+
+    private static boolean isOperator(String s) {
+        return s.equals("+")  s.equals("-")  s.equals("*") || s.equals("/");
+    }
+
+    // 1. buildTree: بناء الشجرة من تعبير Postfix باستخدام المكدس
+    public static Node buildTree(String postfix) {
+        Stack<Node> stack = new Stack<>();
+        postfix = postfix.trim();
+
+        //////////////////////////////////////////
+        String[] tokens;
+        if (postfix.contains(" ")) {
+            tokens = postfix.split("\\s+");
+        } else {
+            tokens = new String[postfix.length()];
+            for (int i = 0; i < postfix.length(); i++) {
+                tokens[i] = String.valueOf(postfix.charAt(i));
+            }
+        }
+
+        for (String token : tokens) {
+            Node node = new Node(token);
+            if (isOperator(token)) {
+                node.right = stack.pop(); // الأول الذي يُسحب هو الابن الأيمن
+                node.left = stack.pop();
+            }
+            stack.push(node);
+        }
+        return stack.isEmpty() ? null : stack.pop();
+    }
+
+    ////////////////////////////////////////////////////////////////////////////
+    public static int evaluate(Node root) {
+        if (root == null) return 0;
+        if (root.left == null && root.right == null) {
+            return Integer.parseInt(root.value);
+        }
+        int l = evaluate(root.left);
+        int r = evaluate(root.right);
+        switch (root.value) {
+            case "+": return l + r;
+            case "-": return l - r;
+            case "*": return l * r;
+            case "/": return l / r;
+        }  return 0;
+    }
+   ///////////////////////////////////////////////////////////////////////////////
+    public static void printInfix(Node root) {
+        if (root == null) return;
+        if (root.left == null && root.right == null) {
+            System.out.print(root.value);
+            return;
+        }
+        System.out.print("(");
+        printInfix(root.left);
+        System.out.print(" " + root.value + " ");
+        printInfix(root.right);
+        System.out.print(")");
+    }
+
+    public static void main(String[] args) {
+        String postfix = "54+72-*";
+        Node root = buildTree(postfix);
+        printInfix(root);
+        System.out.println("\nResult: " + evaluate(root));
+    }
+}
